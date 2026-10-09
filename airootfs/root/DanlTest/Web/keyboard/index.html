@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DanlCheck Keyboard Test</title>
+    <style>
+        /* Reset & Basis */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #1a1a1e;
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: #e4e4e4;
+        }
+
+        #app {
+            max-width: 1100px;
+            width: 100%;
+        }
+
+        /* Branding */
+        .brand {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 4px;
+        }
+        .brand h1 {
+            font-weight: 400;
+            font-size: 2rem;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .brand h1 small {
+            font-size: 0.9rem;
+            font-weight: 300;
+            color: #888;
+        }
+        .brand .version {
+            font-size: 0.85rem;
+            color: #666;
+            background: #2a2a32;
+            padding: 2px 14px;
+            border-radius: 30px;
+            border: 1px solid #3a3a44;
+        }
+
+        .subtitle {
+            color: #888;
+            margin-bottom: 16px;
+            font-size: 0.95rem;
+            border-left: 3px solid #5a7a5a;
+            padding-left: 14px;
+        }
+
+        /* Fortschrittsanzeige */
+        #progress-container {
+            background: #1e1e24;
+            border-radius: 30px;
+            padding: 12px 20px;
+            margin-bottom: 16px;
+            border: 1px solid #33333d;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px 24px;
+        }
+        #progress-container .label {
+            font-weight: 300;
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        #progress-container .label strong {
+            color: #d0d0d0;
+            font-weight: 400;
+        }
+        .progress-bar-wrap {
+            flex: 1 1 200px;
+            height: 8px;
+            background: #2a2a32;
+            border-radius: 10px;
+            overflow: hidden;
+            min-width: 100px;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #4caf50, #8bc34a);
+            border-radius: 10px;
+            transition: width 0.2s ease;
+        }
+        .progress-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #b0b0b0;
+            min-width: 60px;
+            text-align: right;
+        }
+        .progress-text .count {
+            color: #8bc34a;
+        }
+        .missing-badge {
+            font-size: 0.75rem;
+            background: #3a2a2a;
+            color: #e08888;
+            padding: 2px 12px;
+            border-radius: 30px;
+            border: 1px solid #5a3a3a;
+            white-space: nowrap;
+        }
+
+        /* Layout-Steuerung */
+        #layout-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            background: #1e1e24;
+            padding: 8px 16px;
+            border-radius: 40px;
+            border: 1px solid #33333d;
+        }
+        #layout-control .label {
+            font-size: 0.85rem;
+            color: #aaa;
+            margin-right: 4px;
+        }
+        .layout-btn {
+            background: #2a2a32;
+            border: 1px solid #444;
+            color: #ccc;
+            padding: 4px 16px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            font-weight: 500;
+        }
+        .layout-btn:hover {
+            background: #3a3a4a;
+            border-color: #666;
+        }
+        .layout-btn.active {
+            background: #4a6a4a;
+            border-color: #4caf50;
+            color: #fff;
+        }
+
+        /* Größensteuerung (Bildschirm) */
+        #size-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            background: #1e1e24;
+            padding: 8px 16px;
+            border-radius: 40px;
+            border: 1px solid #33333d;
+        }
+        #size-control .label {
+            font-size: 0.85rem;
+            color: #aaa;
+            margin-right: 6px;
+        }
+        .size-btn {
+            background: #2a2a32;
+            border: 1px solid #444;
+            color: #ccc;
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            font-weight: 500;
+        }
+        .size-btn:hover {
+            background: #3a3a4a;
+            border-color: #666;
+        }
+        .size-btn.active {
+            background: #4a6a4a;
+            border-color: #4caf50;
+            color: #fff;
+        }
+
+        /* Tastatur-Container (wird skaliert) */
+        #keyboard-wrapper {
+            transition: transform 0.2s ease;
+            transform-origin: top center;
+            width: 100%;
+        }
+
+        #keyboard {
+            background: #28282e;
+            border-radius: 18px;
+            padding: 24px 28px 20px 28px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        /* Aktuelle Taste */
+        #current-key {
+            background: #1e1e24;
+            border-radius: 10px;
+            padding: 12px 20px;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            border: 1px solid #3a3a44;
+        }
+        #current-key .label {
+            font-weight: 300;
+            color: #888;
+            font-size: 0.9rem;
+        }
+        #current-key .value {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 1.2rem;
+            background: #2a2a32;
+            padding: 4px 14px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            color: #c8d6c8;
+        }
+        #current-key .value .highlight {
+            color: #a0d0a0;
+            font-weight: 600;
+        }
+
+        /* Funktionstasten-Reihe */
+        .function-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+            flex-wrap: nowrap;
+        }
+        .function-row .key {
+            flex: 1 1 0;
+            text-align: center;
+            padding: 8px 0;
+            background: #35353d;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #aaa;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+            transition: all 0.08s ease;
+            cursor: default;
+            user-select: none;
+            border-bottom: 2px solid transparent;
+            position: relative;
+        }
+        .function-row .key.pressed {
+            background: #4e6a4e;
+            border-bottom-color: #8cb88c;
+            color: #fff;
+            transform: scale(0.96);
+            box-shadow: 0 0 18px rgba(100, 200, 100, 0.25);
+        }
+        .function-row .key.tested {
+            border-bottom-color: #4caf50;
+            background: #3a5a3a;
+        }
+        .function-row .key.tested::after {
+            content: '✓';
+            position: absolute;
+            top: -6px;
+            right: -4px;
+            font-size: 0.6rem;
+            color: #4caf50;
+        }
+
+        /* Haupt-Grid (30 Spalten) */
+        .main-grid {
+            display: grid;
+            grid-template-columns: repeat(30, 1fr);
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        /* NumPad-Grid (4 Spalten) */
+        .numpad-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            max-width: 360px;
+            margin-top: 8px;
+        }
+        .numpad-grid .key {
+            min-height: 44px;
+            padding: 8px 0;
+            font-size: 0.85rem;
+        }
+        .numpad-grid .key.span-2 {
+            grid-column: span 2;
+        }
+
+        .key {
+            background: #3d3d46;
+            border-radius: 7px;
+            padding: 12px 0;
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #d4d4dc;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            transition: all 0.08s ease;
+            cursor: default;
+            user-select: none;
+            border-bottom: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            position: relative;
+        }
+
+        .key.special {
+            background: #3a3a5a;
+            color: #b8b8e8;
+            font-size: 0.7rem;
+        }
+
+        .key.space {
+            background: #35353d;
+            color: transparent;
+            position: relative;
+        }
+        .key.space::after {
+            content: '␣';
+            color: #777;
+            font-size: 1.2rem;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .key.pressed {
+            background: #4e7a4e;
+            border-bottom-color: #8cd08c;
+            color: #fff;
+            transform: scale(0.95);
+            box-shadow: 0 0 20px rgba(80, 200, 80, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        .key.special.pressed {
+            background: #5a5a8a;
+            border-bottom-color: #aab0e0;
+            box-shadow: 0 0 20px rgba(100, 120, 255, 0.25);
+        }
+
+        /* Getestete Taste – jetzt auch für Spezialtasten mit grünem Hintergrund */
+        .key.tested {
+            border-bottom-color: #4caf50;
+            background: #3a5a3a;
+        }
+        .key.tested::after {
+            content: '✓';
+            position: absolute;
+            top: -6px;
+            right: -4px;
+            font-size: 0.65rem;
+            color: #4caf50;
+            font-weight: 700;
+        }
+        .key.special.tested {
+            border-bottom-color: #4caf50;
+            background: #3a5a5a;
+        }
+        .key.special.tested::after {
+            color: #4caf50;
+        }
+        .key.space.tested::after {
+            content: '✓';
+            color: #4caf50;
+            top: -6px;
+            right: 4px;
+            font-size: 0.65rem;
+        }
+        .numpad-grid .key.tested::after {
+            top: -4px;
+            right: -2px;
+            font-size: 0.6rem;
+        }
+
+        /* Spezialtasten-Log */
+        #special-container {
+            background: #1e1e24;
+            border-radius: 12px;
+            padding: 16px 20px;
+            border: 1px solid #33333d;
+            margin-top: 8px;
+        }
+        #special-container h3 {
+            font-weight: 400;
+            font-size: 0.95rem;
+            color: #aaa;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        #special-container h3 span {
+            font-size: 0.75rem;
+            background: #2a2a32;
+            padding: 0 10px;
+            border-radius: 20px;
+            color: #666;
+        }
+        #special-keys {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            max-height: 110px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .special-entry {
+            background: #2a2a32;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: #c0c0d0;
+            border-left: 3px solid #5a8a5a;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .special-entry .time {
+            color: #666;
+            font-size: 0.65rem;
+        }
+        .special-entry .code {
+            color: #b0b0e0;
+        }
+        .special-entry .keyval {
+            color: #d0d090;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #555;
+            letter-spacing: 0.5px;
+        }
+        .footer a {
+            color: #777;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            color: #aaa;
+        }
+
+        /* Scrollbar */
+        #special-keys::-webkit-scrollbar {
+            width: 4px;
+        }
+        #special-keys::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        #special-keys::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 4px;
+        }
+
+        /* Responsive */
+        @media (max-width: 700px) {
+            #keyboard {
+                padding: 14px 12px;
+            }
+            .key {
+                font-size: 0.6rem;
+                min-height: 32px;
+                padding: 6px 0;
+                border-radius: 4px;
+            }
+            .function-row .key {
+                font-size: 0.55rem;
+                padding: 4px 0;
+            }
+            .main-grid {
+                gap: 4px;
+            }
+            .numpad-grid {
+                gap: 4px;
+                max-width: 280px;
+            }
+            .numpad-grid .key {
+                min-height: 32px;
+                font-size: 0.7rem;
+            }
+            .function-row {
+                gap: 4px;
+            }
+            #current-key .value {
+                font-size: 0.9rem;
+            }
+            .brand h1 {
+                font-size: 1.5rem;
+            }
+            .special-entry {
+                font-size: 0.65rem;
+                padding: 2px 10px;
+            }
+            #special-container h3 {
+                font-size: 0.8rem;
+            }
+            #progress-container {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            .progress-text {
+                text-align: left;
+            }
+            #layout-control, #size-control {
+                justify-content: center;
+            }
+        }
+        @media (max-width: 480px) {
+            .key {
+                font-size: 0.5rem;
+                min-height: 26px;
+                padding: 4px 0;
+            }
+            .main-grid {
+                gap: 3px;
+            }
+            .numpad-grid {
+                gap: 3px;
+                max-width: 220px;
+            }
+            .numpad-grid .key {
+                min-height: 26px;
+                font-size: 0.6rem;
+            }
+            .function-row {
+                gap: 3px;
+            }
+            .function-row .key {
+                font-size: 0.45rem;
+                padding: 3px 0;
+            }
+            #current-key {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+        }
+
+        /* Skalierungsklassen für Bildschirmgröße */
+        .scale-90 #keyboard-wrapper {
+            transform: scale(0.9);
+        }
+        .scale-80 #keyboard-wrapper {
+            transform: scale(0.8);
+        }
+        .scale-75 #keyboard-wrapper {
+            transform: scale(0.75);
+        }
+        #keyboard-wrapper {
+            min-height: 400px;
+        }
+
+        /* NumPad ausblenden */
+        .numpad-hidden #numpad-container {
+            display: none;
+        }
+        .numpad-hidden .main-grid {
+            margin-bottom: 0;
+        }
+        .numpad-hidden .numpad-grid {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app" class="numpad-hidden">
+        <!-- Branding -->
+        <div class="brand">
+            <h1>
+                ⌨️ DanlCheck
+                <small>Keyboard Test</small>
+            </h1>
+            <span class="version">v2.3 · by DanlTech</span>
+        </div>
+        <div class="subtitle">
+            Drücke jede Taste – getestete Tasten werden grün markiert. Wähle dein Layout (Full / TKL) und die Anzeigegröße.
+        </div>
+
+        <!-- Fortschrittsanzeige -->
+        <div id="progress-container">
+            <span class="label">🔍 Fortschritt</span>
+            <div class="progress-bar-wrap">
+                <div class="progress-bar-fill" id="progress-fill" style="width:0%;"></div>
+            </div>
+            <span class="progress-text" id="progress-text">
+                <span class="count" id="tested-count">0</span> / <span id="total-count">0</span>
+            </span>
+            <span class="missing-badge" id="missing-badge">⚡ noch <span id="missing-count">0</span> fehlend</span>
+        </div>
+
+        <!-- Layout-Auswahl -->
+        <div id="layout-control">
+            <span class="label">⌨️ Tastaturtyp:</span>
+            <button class="layout-btn" data-layout="full">Full (100 % mit NumPad)</button>
+            <button class="layout-btn active" data-layout="tkl">TKL (ohne NumPad)</button>
+        </div>
+
+        <!-- Größensteuerung (Bildschirm) -->
+        <div id="size-control">
+            <span class="label">📐 Anzeigegröße:</span>
+            <button class="size-btn active" data-scale="1">100 %</button>
+            <button class="size-btn" data-scale="0.9">90 %</button>
+            <button class="size-btn" data-scale="0.8">80 %</button>
+            <button class="size-btn" data-scale="0.75">75 %</button>
+        </div>
+
+        <!-- Tastatur (wird skaliert) -->
+        <div id="keyboard-wrapper">
+            <div id="keyboard">
+                <!-- Aktuelle Taste -->
+                <div id="current-key">
+                    <span class="label">Aktuelle Taste</span>
+                    <span class="value" id="current-key-display">
+                        <span class="highlight">—</span> &nbsp; (keine)
+                    </span>
+                    <span class="label" style="margin-left: auto;">event.code</span>
+                    <span class="value" id="current-code-display">—</span>
+                </div>
+
+                <!-- Funktionstasten -->
+                <div id="function-row-container"></div>
+
+                <!-- Haupttastatur -->
+                <div id="main-grid-container"></div>
+
+                <!-- NumPad -->
+                <div id="numpad-container"></div>
+            </div>
+        </div>
+
+        <!-- Spezialtasten-Log -->
+        <div id="special-container">
+            <h3>
+                🧩 Erkannte Spezialtasten
+                <span>letzte 12</span>
+            </h3>
+            <div id="special-keys"></div>
+        </div>
+
+        <div class="footer">
+            DanlTech · DanlCheck Keyboard Test · 2026
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ---- TASTENLAYOUTS ----
+
+            // Funktionstasten (inkl. NumLock)
+            const functionKeys = [
+                { code: 'Escape', label: 'Esc' },
+                { code: 'F1', label: 'F1' },
+                { code: 'F2', label: 'F2' },
+                { code: 'F3', label: 'F3' },
+                { code: 'F4', label: 'F4' },
+                { code: 'F5', label: 'F5' },
+                { code: 'F6', label: 'F6' },
+                { code: 'F7', label: 'F7' },
+                { code: 'F8', label: 'F8' },
+                { code: 'F9', label: 'F9' },
+                { code: 'F10', label: 'F10' },
+                { code: 'F11', label: 'F11' },
+                { code: 'F12', label: 'F12' },
+                { code: 'PrintScreen', label: 'Druck' },
+                { code: 'ScrollLock', label: 'Rollen' },
+                { code: 'NumLock', label: 'Num' },
+                { code: 'Pause', label: 'Pause' },
+            ];
+
+            const mainKeys = [
+                // Zeile 1
+                { code: 'Backquote', label: '^°', row: 1, col: 1, width: 2 },
+                { code: 'Digit1', label: '1', row: 1, col: 3, width: 2 },
+                { code: 'Digit2', label: '2', row: 1, col: 5, width: 2 },
+                { code: 'Digit3', label: '3', row: 1, col: 7, width: 2 },
+                { code: 'Digit4', label: '4', row: 1, col: 9, width: 2 },
+                { code: 'Digit5', label: '5', row: 1, col: 11, width: 2 },
+                { code: 'Digit6', label: '6', row: 1, col: 13, width: 2 },
+                { code: 'Digit7', label: '7', row: 1, col: 15, width: 2 },
+                { code: 'Digit8', label: '8', row: 1, col: 17, width: 2 },
+                { code: 'Digit9', label: '9', row: 1, col: 19, width: 2 },
+                { code: 'Digit0', label: '0', row: 1, col: 21, width: 2 },
+                { code: 'Minus', label: 'ß', row: 1, col: 23, width: 2 },
+                { code: 'Equal', label: '´', row: 1, col: 25, width: 2 },
+                { code: 'Backspace', label: '←', row: 1, col: 27, width: 4, special: true },
+                // Zeile 2
+                { code: 'Tab', label: 'Tab', row: 2, col: 1, width: 3, special: true },
+                { code: 'KeyQ', label: 'Q', row: 2, col: 4, width: 2 },
+                { code: 'KeyW', label: 'W', row: 2, col: 6, width: 2 },
+                { code: 'KeyE', label: 'E', row: 2, col: 8, width: 2 },
+                { code: 'KeyR', label: 'R', row: 2, col: 10, width: 2 },
+                { code: 'KeyT', label: 'T', row: 2, col: 12, width: 2 },
+                { code: 'KeyY', label: 'Z', row: 2, col: 14, width: 2 },
+                { code: 'KeyU', label: 'U', row: 2, col: 16, width: 2 },
+                { code: 'KeyI', label: 'I', row: 2, col: 18, width: 2 },
+                { code: 'KeyO', label: 'O', row: 2, col: 20, width: 2 },
+                { code: 'KeyP', label: 'P', row: 2, col: 22, width: 2 },
+                { code: 'BracketLeft', label: 'Ü', row: 2, col: 24, width: 2 },
+                { code: 'BracketRight', label: '+', row: 2, col: 26, width: 2 },
+                { code: 'Enter', label: '↵', row: 2, col: 28, width: 3, special: true },
+                // Zeile 3
+                { code: 'CapsLock', label: 'Caps', row: 3, col: 1, width: 4, special: true },
+                { code: 'KeyA', label: 'A', row: 3, col: 5, width: 2 },
+                { code: 'KeyS', label: 'S', row: 3, col: 7, width: 2 },
+                { code: 'KeyD', label: 'D', row: 3, col: 9, width: 2 },
+                { code: 'KeyF', label: 'F', row: 3, col: 11, width: 2 },
+                { code: 'KeyG', label: 'G', row: 3, col: 13, width: 2 },
+                { code: 'KeyH', label: 'H', row: 3, col: 15, width: 2 },
+                { code: 'KeyJ', label: 'J', row: 3, col: 17, width: 2 },
+                { code: 'KeyK', label: 'K', row: 3, col: 19, width: 2 },
+                { code: 'KeyL', label: 'L', row: 3, col: 21, width: 2 },
+                { code: 'Semicolon', label: 'Ö', row: 3, col: 23, width: 2 },
+                { code: 'Quote', label: 'Ä', row: 3, col: 25, width: 2 },
+                { code: 'Backslash', label: '#', row: 3, col: 27, width: 2 },
+                // Zeile 4
+                { code: 'ShiftLeft', label: 'Shift', row: 4, col: 1, width: 4, special: true },
+                { code: 'IntlBackslash', label: '<', row: 4, col: 5, width: 2 },
+                { code: 'KeyZ', label: 'Y', row: 4, col: 7, width: 2 },
+                { code: 'KeyX', label: 'X', row: 4, col: 9, width: 2 },
+                { code: 'KeyC', label: 'C', row: 4, col: 11, width: 2 },
+                { code: 'KeyV', label: 'V', row: 4, col: 13, width: 2 },
+                { code: 'KeyB', label: 'B', row: 4, col: 15, width: 2 },
+                { code: 'KeyN', label: 'N', row: 4, col: 17, width: 2 },
+                { code: 'KeyM', label: 'M', row: 4, col: 19, width: 2 },
+                { code: 'Comma', label: ',', row: 4, col: 21, width: 2 },
+                { code: 'Period', label: '.', row: 4, col: 23, width: 2 },
+                { code: 'Slash', label: '-', row: 4, col: 25, width: 2 },
+                { code: 'ShiftRight', label: 'Shift', row: 4, col: 27, width: 4, special: true },
+                // Zeile 5
+                { code: 'ControlLeft', label: 'Strg', row: 5, col: 1, width: 3, special: true },
+                { code: 'MetaLeft', label: 'Win', row: 5, col: 4, width: 3, special: true },
+                { code: 'AltLeft', label: 'Alt', row: 5, col: 7, width: 3, special: true },
+                { code: 'Space', label: ' ', row: 5, col: 10, width: 10, special: true },
+                { code: 'AltRight', label: 'Alt Gr', row: 5, col: 20, width: 3, special: true },
+                { code: 'MetaRight', label: 'Win', row: 5, col: 23, width: 3, special: true },
+                { code: 'ContextMenu', label: 'Menu', row: 5, col: 26, width: 2, special: true },
+                { code: 'ControlRight', label: 'Strg', row: 5, col: 28, width: 3, special: true },
+            ];
+
+            // NumPad-Tasten (4 Spalten)
+            const numpadKeys = [
+                { code: 'NumpadDivide', label: '/' },
+                { code: 'NumpadMultiply', label: '*' },
+                { code: 'NumpadSubtract', label: '-' },
+                { code: 'NumpadAdd', label: '+' },
+                { code: 'Numpad7', label: '7' },
+                { code: 'Numpad8', label: '8' },
+                { code: 'Numpad9', label: '9' },
+                { code: 'Numpad4', label: '4' },
+                { code: 'Numpad5', label: '5' },
+                { code: 'Numpad6', label: '6' },
+                { code: 'Numpad1', label: '1' },
+                { code: 'Numpad2', label: '2' },
+                { code: 'Numpad3', label: '3' },
+                { code: 'Numpad0', label: '0', span: 2 },
+                { code: 'NumpadDecimal', label: '.' },
+                { code: 'NumpadEnter', label: '↵' },
+            ];
+
+            // ---- DOM-Referenzen ----
+            const funcContainer = document.getElementById('function-row-container');
+            const mainContainer = document.getElementById('main-grid-container');
+            const numpadContainer = document.getElementById('numpad-container');
+            const specialKeysContainer = document.getElementById('special-keys');
+            const currentKeyDisplay = document.getElementById('current-key-display');
+            const currentCodeDisplay = document.getElementById('current-code-display');
+
+            const progressFill = document.getElementById('progress-fill');
+            const testedCountSpan = document.getElementById('tested-count');
+            const totalCountSpan = document.getElementById('total-count');
+            const missingCountSpan = document.getElementById('missing-count');
+
+            const app = document.getElementById('app');
+
+            // ---- Tastatur rendern (einmalig) ----
+
+            // Funktionstasten
+            const funcRow = document.createElement('div');
+            funcRow.className = 'function-row';
+            functionKeys.forEach(k => {
+                const el = document.createElement('div');
+                el.className = 'key';
+                el.dataset.code = k.code;
+                el.textContent = k.label;
+                funcRow.appendChild(el);
+            });
+            funcContainer.appendChild(funcRow);
+
+            // Haupttasten
+            const mainGrid = document.createElement('div');
+            mainGrid.className = 'main-grid';
+            mainKeys.forEach(k => {
+                const el = document.createElement('div');
+                el.className = 'key' + (k.special ? ' special' : '');
+                if (k.code === 'Space') el.classList.add('space');
+                el.dataset.code = k.code;
+                el.textContent = k.label;
+                el.style.gridRow = k.row;
+                el.style.gridColumn = `${k.col} / span ${k.width}`;
+                mainGrid.appendChild(el);
+            });
+            mainContainer.appendChild(mainGrid);
+
+            // NumPad (wird später ein-/ausgeblendet)
+            const numpadGrid = document.createElement('div');
+            numpadGrid.className = 'numpad-grid';
+            numpadKeys.forEach(k => {
+                const el = document.createElement('div');
+                el.className = 'key';
+                if (k.span) el.classList.add('span-2');
+                el.dataset.code = k.code;
+                el.textContent = k.label;
+                numpadGrid.appendChild(el);
+            });
+            numpadContainer.appendChild(numpadGrid);
+
+            // ---- State ----
+            let currentLayout = 'tkl'; // 'full' oder 'tkl'
+            const pressed = new Set();
+            const tested = new Set();
+            const specialLog = [];
+
+            // ---- Hilfsfunktionen ----
+
+            function getKeyElement(code) {
+                return document.querySelector(`.key[data-code="${code}"]`);
+            }
+
+            function clearPressed() {
+                document.querySelectorAll('.key.pressed').forEach(el => el.classList.remove('pressed'));
+                pressed.clear();
+            }
+
+            function renderSpecialLog() {
+                specialKeysContainer.innerHTML = specialLog.map(entry =>
+                    `<span class="special-entry">
+                        <span class="time">${entry.time}</span>
+                        <span class="code">${entry.code}</span>
+                        <span class="keyval">${entry.key !== undefined ? entry.key : ''}</span>
+                    </span>`
+                ).join('');
+            }
+
+            function addSpecialLog(code, key) {
+                const now = new Date();
+                const time = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                specialLog.unshift({ code, key, time });
+                if (specialLog.length > 12) specialLog.pop();
+                renderSpecialLog();
+            }
+
+            function updateCurrentKey(code, key) {
+                currentKeyDisplay.innerHTML = `<span class="highlight">${key !== undefined ? key : '—'}</span> &nbsp; (${key !== undefined ? 'event.key' : 'keine'})`;
+                currentCodeDisplay.textContent = code || '—';
+            }
+
+            // Alle getesteten Markierungen entfernen
+            function clearTested() {
+                document.querySelectorAll('.key.tested').forEach(el => el.classList.remove('tested'));
+                tested.clear();
+            }
+
+            // Fortschritt aktualisieren (basierend auf aktuellen tested und total)
+            function updateProgress() {
+                const totalKeys = getAllLayoutCodes().size;
+                const testedCount = tested.size;
+                const missing = totalKeys - testedCount;
+                const percent = totalKeys > 0 ? (testedCount / totalKeys) * 100 : 0;
+                progressFill.style.width = `${percent}%`;
+                testedCountSpan.textContent = testedCount;
+                totalCountSpan.textContent = totalKeys;
+                missingCountSpan.textContent = missing;
+                const badge = document.getElementById('missing-badge');
+                if (missing === 0 && totalKeys > 0) {
+                    badge.innerHTML = '✅ alle Tasten getestet!';
+                    badge.style.borderColor = '#4caf50';
+                    badge.style.color = '#8bc34a';
+                } else {
+                    badge.innerHTML = `⚡ noch <span id="missing-count">${missing}</span> fehlend`;
+                    badge.style.borderColor = '#5a3a3a';
+                    badge.style.color = '#e08888';
+                }
+            }
+
+            // Alle Layout-Codes (je nach aktueller Einstellung)
+            function getAllLayoutCodes() {
+                const codes = new Set([
+                    ...functionKeys.map(k => k.code),
+                    ...mainKeys.map(k => k.code)
+                ]);
+                if (currentLayout === 'full') {
+                    numpadKeys.forEach(k => codes.add(k.code));
+                }
+                return codes;
+            }
+
+            // Taste als getestet markieren (nur wenn im aktuellen Layout)
+            function markTested(code) {
+                const allCodes = getAllLayoutCodes();
+                if (!allCodes.has(code)) return false;
+                if (tested.has(code)) return false;
+                tested.add(code);
+                const el = getKeyElement(code);
+                if (el) {
+                    el.classList.add('tested');
+                }
+                updateProgress();
+                return true;
+            }
+
+            // Layout wechseln
+            function setLayout(layout) {
+                if (layout === currentLayout) return;
+                currentLayout = layout;
+
+                // NumPad anzeigen/ausblenden
+                if (layout === 'full') {
+                    app.classList.remove('numpad-hidden');
+                } else {
+                    app.classList.add('numpad-hidden');
+                }
+
+                // Alle getesteten zurücksetzen
+                clearTested();
+                clearPressed();
+                // Fortschritt zurücksetzen
+                updateProgress();
+                // Aktuelle Taste zurücksetzen
+                updateCurrentKey(null, null);
+                // Spezialtasten-Log leeren (optional)
+                specialLog.length = 0;
+                renderSpecialLog();
+
+                // Buttons aktiv setzen
+                document.querySelectorAll('.layout-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.layout === layout);
+                });
+            }
+
+            // ---- Größensteuerung (Bildschirm) ----
+            const sizeBtns = document.querySelectorAll('.size-btn');
+            const wrapper = document.getElementById('keyboard-wrapper');
+
+            function setScale(scale) {
+                app.classList.remove('scale-90', 'scale-80', 'scale-75');
+                if (scale !== 1) {
+                    app.classList.add(`scale-${Math.round(scale*100)}`);
+                }
+                sizeBtns.forEach(btn => {
+                    btn.classList.toggle('active', parseFloat(btn.dataset.scale) === scale);
+                });
+            }
+
+            sizeBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    setScale(parseFloat(this.dataset.scale));
+                });
+            });
+            setScale(1); // Standard 100%
+
+            // ---- Layout-Buttons ----
+            document.querySelectorAll('.layout-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    setLayout(this.dataset.layout);
+                });
+            });
+
+            // ---- Initiales Layout: TKL (ohne NumPad) ----
+            // Wir setzen den initialen Zustand: TKL aktiv
+            document.querySelector('.layout-btn[data-layout="tkl"]').classList.add('active');
+            app.classList.add('numpad-hidden');
+            currentLayout = 'tkl';
+            updateProgress();
+
+            // ---- Event-Listener ----
+
+            document.addEventListener('keydown', function(e) {
+                const code = e.code;
+                const key = e.key;
+                e.preventDefault();
+
+                const allCodes = getAllLayoutCodes();
+                if (allCodes.has(code)) {
+                    const el = getKeyElement(code);
+                    if (el && !pressed.has(code)) {
+                        el.classList.add('pressed');
+                        pressed.add(code);
+                    }
+                    markTested(code);
+                } else {
+                    if (!pressed.has(code)) {
+                        addSpecialLog(code, key);
+                        pressed.add(code);
+                    }
+                }
+
+                updateCurrentKey(code, key);
+            });
+
+            document.addEventListener('keyup', function(e) {
+                const code = e.code;
+                e.preventDefault();
+
+                const el = getKeyElement(code);
+                if (el) {
+                    el.classList.remove('pressed');
+                }
+                pressed.delete(code);
+
+                if (pressed.size === 0) {
+                    // optional: Anzeige zurücksetzen
+                    // updateCurrentKey(null, null);
+                }
+            });
+
+            document.addEventListener('blur', function() {
+                document.querySelectorAll('.key.pressed').forEach(el => el.classList.remove('pressed'));
+                pressed.clear();
+                updateCurrentKey(null, null);
+            });
+
+            // ---- Initialisierung ----
+            renderSpecialLog();
+            updateCurrentKey(null, null);
+            console.log('✅ DanlCheck Keyboard Test mit Layout-Auswahl (Full / TKL) geladen!');
+
+        })();
+    </script>
+
+</body>
+</html>

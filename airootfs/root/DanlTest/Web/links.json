@@ -1,0 +1,22 @@
+[
+  {
+    "title": "DanlBench",
+    "url": "danlbench/index.html",
+    "description": "Benchmark für (fast) alle Plattformen"
+  },
+  {
+    "title": "DanlTest Keyboard Test",
+    "url": "keyboard/index.html",
+    "description": "Test für Tastaturen"
+  },
+    {
+    "title": "DanlTest Touchscreen Test",
+    "url": "touchscreen/index.html",
+    "description": "Test für den Touchscreen"
+  },
+  {
+    "title": "Über",
+    "url": "about/index.html",
+    "description": "Über dieses System"
+  }
+]

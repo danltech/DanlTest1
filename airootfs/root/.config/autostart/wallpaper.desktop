@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Set DT Wallpaper
+Exec=/usr/bin/plasma-apply-wallpaperimage /usr/share/wallpapers/danltech.png
+X-KDE-autostart-phase=2
+

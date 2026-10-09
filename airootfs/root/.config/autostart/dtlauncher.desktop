@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=Chromium
+Exec=python3 /root/DanlTest/Launcher/launcher.py
+X-GNOME-Autostart-enabled=true

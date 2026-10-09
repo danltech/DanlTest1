@@ -1,0 +1,12 @@
+NAME="DanlTechOS"
+PRETTY_NAME="DanlTechOS"
+ID="danltechos"
+ID_LIKE="arch"
+BUILD_ID=rolling
+ANSI_COLOR="38;2;61;212;37"
+HOME_URL="https://github.com/danltech"
+DOCUMENTATION_URL="https://github.com/danltech"
+SUPPORT_URL="https://github.com/danltech"
+BUG_REPORT_URL="https://github.com/danltech"
+PRIVACY_POLICY_URL="https://github.com/danltech"
+LOGO="danltechos"

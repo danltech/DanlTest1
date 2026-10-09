@@ -1,0 +1,233 @@
+[
+    {
+        "name": "Ark",
+        "description": "Archivverwaltung – Packen und Entpacken von ZIP, TAR, RAR u. v. m.",
+        "category": "Utilities",
+        "command": "ark",
+        "terminal": false
+    },
+    {
+        "name": "Chntpw (Windows Passwort zurücksetzen)",
+        "description": "Kommandozeilen-Tool zum Zurücksetzen von Windows-Benutzerpasswörtern (NT-Systeme)",
+        "category": "System",
+        "command": "chntpw",
+        "terminal": true
+    },
+    {
+        "name": "Chromium (DanlTest Edition)",
+        "description": "Webbrowser – schnelles und sicheres Surfen im Internet in der angepassten DanlTest Edition",
+        "category": "Internet",
+        "command": "chromium --no-sandbox --start-maximized --disable-web-security --user-data-dir=/root/chromiumdatas /root/DanlTest/Web/index.html",
+        "terminal": false
+    },
+    {
+        "name": "ClamTk",
+        "description": "Grafische Benutzeroberfläche für den Virenscanner ClamAV – Virenscan und Quarantäne",
+        "category": "Sicherheit",
+        "command": "clamtk",
+        "terminal": false
+    },
+    {
+        "name": "Clonezilla",
+        "description": "Festplatten-Klon- und Imaging-Tool – Backup und Wiederherstellung von Partitionen",
+        "category": "System",
+        "command": "clonezilla",
+        "terminal": false
+    },
+    {
+        "name": "Dolphin",
+        "description": "Dateimanager – intuitive Verwaltung von Dateien und Ordnern",
+        "category": "System",
+        "command": "dolphin",
+        "terminal": false
+    },
+    {
+        "name": "Double Commander",
+        "description": "Zwei-Fenster-Dateimanager mit erweiterten Funktionen (orthodoxer Dateimanager)",
+        "category": "Utilities",
+        "command": "doublecmd",
+        "terminal": false
+    },
+    {
+        "name": "FileZilla",
+        "description": "FTP-/SFTP-Client – einfacher Dateitransfer zu Servern",
+        "category": "Netzwerk",
+        "command": "filezilla",
+        "terminal": false
+    },
+    {
+        "name": "GIMP",
+        "description": "Bildbearbeitungsprogramm – professionelle Retusche und Grafikdesign",
+        "category": "Grafik",
+        "command": "gimp",
+        "terminal": false
+    },
+    {
+        "name": "GLMark2",
+        "description": "OpenGL-Benchmark – Test der 3D-Grafikleistung",
+        "category": "System",
+        "command": "glmark2",
+        "terminal": false
+    },
+    {
+        "name": "GNOME Disks",
+        "description": "Festplattenverwaltung – SMART-Daten, Partitionen und Image-Erstellung",
+        "category": "System",
+        "command": "gnome-disks",
+        "terminal": false
+    },
+    {
+        "name": "GParted",
+        "description": "Partition Editor – Verwalten, Verkleinern und Formatieren von Festplattenpartitionen",
+        "category": "System",
+        "command": "gparted",
+        "terminal": false
+    },
+    {
+        "name": "GSmartControl",
+        "description": "SMART-Datenauswertung – Überwachung und Diagnose von Festplatten",
+        "category": "System",
+        "command": "gsmartcontrol",
+        "terminal": false
+    },
+    {
+        "name": "Gufw",
+        "description": "Einfache Firewall-Konfiguration (GUI für UFW)",
+        "category": "Sicherheit",
+        "command": "gufw",
+        "terminal": false
+    },
+    {
+        "name": "Hardinfo",
+        "description": "Systeminformationen – detaillierte Hardware- und Software-Übersicht",
+        "category": "System",
+        "command": "hardinfo",
+        "terminal": false
+    },
+    {
+        "name": "Kate",
+        "description": "Erweiterter Texteditor mit Syntaxhervorhebung und Plugins",
+        "category": "Entwicklung",
+        "command": "kate",
+        "terminal": false
+    },
+    {
+        "name": "KDE Partition Manager",
+        "description": "Partitionierungs-Tool für KDE – erstellen, löschen und ändern von Partitionen",
+        "category": "System",
+        "command": "partitionmanager",
+        "terminal": false
+    },
+    {
+        "name": "Kdenlive",
+        "description": "Videobearbeitungssoftware – professioneller Schnitt mit vielen Effekten",
+        "category": "Multimedia",
+        "command": "kdenlive",
+        "terminal": false
+    },
+    {
+        "name": "KDiff3",
+        "description": "Datei- und Verzeichnisvergleich – Unterschiede anzeigen und zusammenführen",
+        "category": "Entwicklung",
+        "command": "kdiff3",
+        "terminal": false
+    },
+    {
+        "name": "KDiskMark",
+        "description": "Benchmark für SSDs und Festplatten – Geschwindigkeitstest",
+        "category": "System",
+        "command": "kdiskmark",
+        "terminal": false
+    },
+    {
+        "name": "KeePassXC",
+        "description": "Passwort-Manager – sicheres Speichern und Verwalten von Zugangsdaten",
+        "category": "Sicherheit",
+        "command": "keepassxc",
+        "terminal": false
+    },
+    {
+        "name": "KFind",
+        "description": "Dateisuchwerkzeug – schnelle Suche nach Dateien und Ordnern",
+        "category": "Utilities",
+        "command": "kfind",
+        "terminal": false
+    },
+    {
+        "name": "KInfoCenter",
+        "description": "Systeminformationen und Hardware-Erkennung (KDE)",
+        "category": "System",
+        "command": "kinfocenter",
+        "terminal": false
+    },
+    {
+        "name": "Konsole",
+        "description": "Terminal-Emulator – Zugriff auf die Kommandozeile",
+        "category": "System",
+        "command": "konsole",
+        "terminal": false
+    },
+    {
+        "name": "Krita",
+        "description": "Digitale Mal- und Zeichenanwendung – für Künstler und Illustratoren",
+        "category": "Grafik",
+        "command": "krita",
+        "terminal": false
+    },
+    {
+        "name": "KVIrc",
+        "description": "IRC-Client – Chatten in Internet-Relay-Chat-Netzwerken",
+        "category": "Internet",
+        "command": "kvirc",
+        "terminal": false
+    },
+    {
+        "name": "LibreOffice",
+        "description": "Büro-Suite – Textverarbeitung, Tabellen, Präsentationen und mehr",
+        "category": "Büro",
+        "command": "libreoffice",
+        "terminal": false
+    },
+    {
+        "name": "Nvtop",
+        "description": "GPU-Monitor für NVIDIA/AMD/Intel – Auslastung und Temperatur anzeigen",
+        "category": "System",
+        "command": "nvtop",
+        "terminal": true
+    },
+    {
+        "name": "Plasma Systemmonitor",
+        "description": "Systemüberwachung – Prozesse, Speicher, CPU und Netzwerk im Blick",
+        "category": "System",
+        "command": "plasma-systemmonitor",
+        "terminal": false
+    },
+    {
+        "name": "Remmina",
+        "description": "Remote-Desktop-Client – RDP, VNC, SSH und mehr",
+        "category": "Netzwerk",
+        "command": "remmina",
+        "terminal": false
+    },
+    {
+        "name": "VLC media player",
+        "description": "Multimedia-Player – unterstützt fast alle Audio- und Videoformate",
+        "category": "Multimedia",
+        "command": "vlc",
+        "terminal": false
+    },
+    {
+        "name": "Wireshark",
+        "description": "Netzwerkprotokoll-Analyse – Pakete mitschneiden und auswerten",
+        "category": "Netzwerk",
+        "command": "wireshark",
+        "terminal": false
+    },
+    {
+        "name": "Zenmap",
+        "description": "Grafische Oberfläche für Nmap – Netzwerkscans und Portanalyse",
+        "category": "Netzwerk",
+        "command": "zenmap",
+        "terminal": false
+    }
+]

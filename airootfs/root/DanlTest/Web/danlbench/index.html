@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DanlBench V1</title>
+    <style>
+        body {
+        font-family: Arial, sans-serif;
+        background: #f0f0f0;
+        margin: 0;
+        padding: 20px;
+        }
+        #container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 20px;
+        border: 1px solid #ccc;
+        }
+        h1 {
+        text-align: center;
+        color: #333;
+        margin-top: 0;
+        }
+        .subtitle {
+        text-align: center;
+        color: #666;
+        font-size: 14px;
+        }
+        button {
+        display: block;
+        width: 200px;
+        margin: 20px auto;
+        padding: 10px;
+        font-size: 18px;
+        cursor: pointer;
+        background: #4CAF50;
+        color: white;
+        border: 1px solid #388E3C;
+        border-radius: 0;
+        }
+        button:disabled {
+        background: #aaa;
+        border-color: #888;
+        cursor: default;
+        }
+        #progress {
+        text-align: center;
+        margin: 20px 0;
+        font-weight: bold;
+        min-height: 1.5em;
+        }
+        #result {
+        margin-top: 20px;
+        border-top: 1px solid #ccc;
+        padding-top: 20px;
+        display: none;
+        }
+        #scoreDisplay {
+        font-size: 28px;
+        text-align: center;
+        font-weight: bold;
+        }
+        #rankingDisplay {
+        margin-top: 20px;
+        }
+        table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        }
+        th, td {
+        border: 1px solid #ddd;
+        padding: 6px 8px;
+        text-align: center;
+        }
+        th {
+        background: #f2f2f2;
+        }
+        .highlight {
+        background: #ffffcc;
+        }
+        #details {
+        margin-top: 20px;
+        font-size: 13px;
+        color: #555;
+        }
+        #details table {
+        font-size: 13px;
+        }
+        .error {
+        color: #c00;
+        text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div id="container">
+    <h1>⚡ DanlBench V1</h1>
+    <p class="subtitle">CPU Benchmark in HTML, JS, CSS – Cross‑Platform</p>
+    <p class="subtitle"><i>Online Version for GH Pages</i></p>
+
+    <button id="startBtn">Start Benchmark</button>
+    <div id="progress">Ready</div>
+
+    <div id="result">
+        <div id="scoreDisplay">Score: <span id="scoreValue">-</span></div>
+        <div id="rankingDisplay">
+            <h3>Ranking Classification</h3>
+            <div id="rankingInfo">Loading ranking data …</div>
+        </div>
+        <div id="details">
+            <h4>Test Details</h4>
+            <div id="detailsContent"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // DanlBench V1 – CPU‑Benchmark (ES3‑kompatibel)
+    // ============================================================
+
+    // Globale Variablen
+    var rankingData = null;
+    var rankingLoaded = false;
+    var scores = {};
+    var isRunning = false;
+
+    // DOM-Referenzen
+    var startBtn = document.getElementById('startBtn');
+    var progressDiv = document.getElementById('progress');
+    var resultDiv = document.getElementById('result');
+    var scoreSpan = document.getElementById('scoreValue');
+    var rankingInfoDiv = document.getElementById('rankingInfo');
+    var detailsContent = document.getElementById('detailsContent');
+
+    // URL für die Ranking-Daten (raw.githubusercontent.com)
+    var RANKING_URL = 'https://raw.githubusercontent.com/danltech/danlbench-results/main/v1/results.json';
+
+    // Ranking von externer URL laden – Fehler werden abgefangen, damit der Benchmark offline läuft
+    function loadRanking(callback) {
+    if (rankingLoaded) {
+    if (callback) callback();
+    return;
+    }
+
+    if (!navigator.onLine) {
+    rankingData = null;
+    rankingLoaded = false;
+    alert("Failed to load rankings. Please check your internet connection.");
+    if (callback) callback();
+    return;
+    }
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', RANKING_URL, true);
+    xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4) {
+    if (xhr.status === 200) {
+    try {
+    rankingData = JSON.parse(xhr.responseText);
+    rankingLoaded = true;
+    } catch (e) {
+    rankingData = null;
+    rankingLoaded = false;
+    alert("Failed to parse ranking data.");
+    }
+    } else {
+    rankingData = null;
+    rankingLoaded = false;
+    alert("Server error while fetching rankings.");
+    }
+    if (callback) callback();
+    }
+    };
+
+    xhr.onerror = function() {
+    rankingData = null;
+    rankingLoaded = false;
+    alert("Network error. Could not connect to GitHub.");
+    if (callback) callback();
+    };
+
+    xhr.send(null);
+    }
+
+    // ----- Testfunktionen (feste Arbeit pro Iteration) -----
+
+    function testInteger(iter) {
+    var a = 1, b = 2, c = 3, d = 4;
+    for (var i = 0; i < iter; i++) {
+    a = (a + b) % 1000;
+    b = (b * c) % 1000;
+    c = (c - d + 1000) % 1000;
+    d = (d / 2 + a) % 1000;
+    }
+    return a + b + c + d;
+    }
+
+    function testFloat(iter) {
+    var sum = 0;
+    for (var i = 0; i < iter; i++) {
+    var x = i / 1000;
+    sum += Math.sin(x) * Math.cos(x);
+    }
+    return sum;
+    }
+
+    function testSieve(iter) {
+    var limit = 2000;
+    var count = 0;
+    for (var run = 0; run < iter; run++) {
+    var sieve = new Array(limit + 1);
+    for (var i = 2; i <= limit; i++) sieve[i] = true;
+    for (var i = 2; i * i <= limit; i++) {
+    if (sieve[i]) {
+    for (var j = i * i; j <= limit; j += i) sieve[j] = false;
+    }
+    }
+    for (var i = 2; i <= limit; i++) {
+    if (sieve[i]) count++;
+    }
+    }
+    return count;
+    }
+
+    function testMatrix(iter) {
+    var size = 20;
+    var result = 0;
+    for (var run = 0; run < iter; run++) {
+    var A = [], B = [], C = [];
+    for (var i = 0; i < size; i++) {
+    A[i] = []; B[i] = []; C[i] = [];
+    for (var j = 0; j < size; j++) {
+    A[i][j] = Math.random() * 10;
+    B[i][j] = Math.random() * 10;
+    C[i][j] = 0;
+    }
+    }
+    for (var i = 0; i < size; i++) {
+    for (var j = 0; j < size; j++) {
+    var sum = 0;
+    for (var k = 0; k < size; k++) {
+    sum += A[i][k] * B[k][j];
+    }
+    C[i][j] = sum;
+    }
+    }
+    result += C[size - 1][size - 1];
+    }
+    return result;
+    }
+
+    function testSort(iter) {
+    var size = 500;
+    var result = 0;
+    for (var run = 0; run < iter; run++) {
+    var arr = [];
+    for (var i = 0; i < size; i++) {
+    arr.push(Math.random());
+    }
+
+    function swap(a, i, j) {
+    var tmp = a[i];
+    a[i] = a[j];
+    a[j] = tmp;
+    }
+
+    function partition(a, left, right) {
+    var pivot = a[right];
+    var i = left - 1;
+    for (var j = left; j < right; j++) {
+    if (a[j] < pivot) {
+    i++;
+    swap(a, i, j);
+    }
+    }
+    swap(a, i + 1, right);
+    return i + 1;
+    }
+
+    function quicksort(a, left, right) {
+    if (left < right) {
+    var pi = partition(a, left, right);
+    quicksort(a, left, pi - 1);
+    quicksort(a, pi + 1, right);
+    }
+    }
+
+    var copy = arr.slice(0);
+    quicksort(copy, 0, copy.length - 1);
+    result += copy[0];
+    }
+    return result;
+    }
+
+    // Benchmark-Hilfsfunktion (adaptiv)
+    function runTest(testFn, initialIter) {
+    var targetTime = 1000;
+    var iter = initialIter;
+
+    var start = Date.now();
+    testFn(iter);
+    var elapsed = Date.now() - start;
+
+    if (elapsed > 0) {
+    var scale = targetTime / elapsed;
+    var newIter = Math.floor(iter * scale);
+    if (newIter < 1) newIter = 1;
+    if (newIter > 100000000) newIter = 100000000;
+    iter = newIter;
+    }
+
+    start = Date.now();
+    testFn(iter);
+    elapsed = Date.now() - start;
+    if (elapsed === 0) elapsed = 1;
+
+    return (iter / elapsed) * 1000;
+    }
+
+    // Liste der Tests
+    var tests = [
+    { name: 'Integer', fn: testInteger, initialIter: 200000 },
+    { name: 'Float',   fn: testFloat,   initialIter: 50000 },
+    { name: 'Sieve',   fn: testSieve,   initialIter: 500 },
+    { name: 'Matrix',  fn: testMatrix,  initialIter: 20 },
+    { name: 'Sort',    fn: testSort,    initialIter: 50 }
+    ];
+
+    // Führt alle Tests nacheinander aus
+    function runBenchmarkSeries(index) {
+    if (index >= tests.length) {
+    finishBenchmark();
+    return;
+    }
+
+    var test = tests[index];
+    progressDiv.innerHTML = 'Test ' + (index + 1) + '/' + tests.length +
+    ': ' + test.name + ' (running) …';
+
+    var results = [];
+    for (var i = 0; i < 3; i++) {
+    results.push(runTest(test.fn, test.initialIter));
+    }
+    results.sort(function(a, b) { return a - b; });
+    scores[test.name] = results[1];
+
+    setTimeout(function() {
+    runBenchmarkSeries(index + 1);
+    }, 30);
+    }
+
+    // Berechnet den Gesamtscore und zeigt die Ergebnisse an
+    function finishBenchmark() {
+    var product = 1;
+    var count = 0;
+    for (var name in scores) {
+    if (scores.hasOwnProperty(name)) {
+    product *= scores[name];
+    count++;
+    }
+    }
+    var geometricMean = Math.pow(product, 1 / count);
+    var totalScore = Math.round(geometricMean);
+
+    scoreSpan.innerHTML = totalScore;
+    resultDiv.style.display = 'block';
+
+    showRanking(totalScore);
+    showDetails(scores);
+
+    startBtn.disabled = false;
+    startBtn.innerHTML = 'Run again';
+    isRunning = false;
+    progressDiv.innerHTML = 'Done.';
+    }
+
+    // Zeigt das Ranking an (max. 5 Einträge um den eigenen Score herum)
+    function showRanking(score) {
+    if (!rankingLoaded || !rankingData || !rankingData.length) {
+    rankingInfoDiv.innerHTML = '<span class="error">No ranking data available (could not reach the results URL).</span>';
+    return;
+    }
+
+    var sorted = rankingData.slice(0);
+    sorted.sort(function(a, b) { return a.score - b.score; });
+
+    var insertIndex = 0;
+    while (insertIndex < sorted.length && sorted[insertIndex].score <= score) {
+    insertIndex++;
+    }
+
+    var start = insertIndex - 2;
+    if (start < 0) start = 0;
+    var end = insertIndex + 2;
+    if (end > sorted.length) end = sorted.length;
+
+    var tableHtml = '<table><tr><th>Device</th><th>Score</th></tr>';
+
+    for (var i = start; i < insertIndex; i++) {
+    var entry = sorted[i];
+    tableHtml += '<tr><td>' + entry.name + '</td><td>' + entry.score + '</td></tr>';
+    }
+
+    tableHtml += '<tr class="highlight"><td><strong>This device</strong></td><td><strong>' + score + '</strong></td></tr>';
+
+    for (var i = insertIndex; i < end; i++) {
+    var entry = sorted[i];
+    tableHtml += '<tr><td>' + entry.name + '</td><td>' + entry.score + '</td></tr>';
+    }
+
+    tableHtml += '</table>';
+
+    var lower = null, higher = null;
+    for (var i = 0; i < sorted.length; i++) {
+    if (sorted[i].score <= score) lower = sorted[i];
+    else { higher = sorted[i]; break; }
+    }
+    var infoText = 'Your score is ';
+    if (lower && higher) {
+    infoText += 'between <strong>' + lower.name + ' (' + lower.score + ')</strong> and <strong>' + higher.name + ' (' + higher.score + ')</strong>.';
+    } else if (lower && !higher) {
+    infoText += 'above <strong>' + lower.name + ' (' + lower.score + ')</strong> – you are the fastest!';
+    } else if (!lower && higher) {
+    infoText += 'below <strong>' + higher.name + ' (' + higher.score + ')</strong> – unfortunately the slowest.';
+    } else {
+    infoText += 'no comparison data available.';
+    }
+
+    rankingInfoDiv.innerHTML = '<p>' + infoText + '</p>' + tableHtml;
+    }
+
+    // Zeigt die Einzelergebnisse der Tests an
+    function showDetails(scores) {
+    var html = '<table><tr><th>Test</th><th>ops/sec</th></tr>';
+    for (var name in scores) {
+    if (scores.hasOwnProperty(name)) {
+    html += '<tr><td>' + name + '</td><td>' + Math.round(scores[name]) + '</td></tr>';
+    }
+    }
+    html += '</table>';
+    detailsContent.innerHTML = html;
+    }
+
+    // Startet den Benchmark (wird durch Button ausgelöst)
+    function startBenchmark() {
+    if (isRunning) return;
+    isRunning = true;
+    startBtn.disabled = true;
+    startBtn.innerHTML = 'Running …';
+    progressDiv.innerHTML = 'Loading ranking …';
+    resultDiv.style.display = 'none';
+    scores = {};
+
+    loadRanking(function() {
+    if (!rankingLoaded) {
+    rankingInfoDiv.innerHTML = '<span class="error">Ranking file could not be loaded (offline or URL unreachable).</span>';
+    }
+    progressDiv.innerHTML = 'Starting benchmark …';
+    setTimeout(function() {
+    runBenchmarkSeries(0);
+    }, 50);
+    });
+    }
+
+    // Event-Bindung für den Button
+    if (startBtn.addEventListener) {
+    startBtn.addEventListener('click', startBenchmark);
+    } else if (startBtn.attachEvent) {
+    startBtn.attachEvent('onclick', startBenchmark);
+    } else {
+    startBtn.onclick = startBenchmark;
+    }
+
+    // Ranking beim Laden der Seite bereits versuchen (optional)
+    loadRanking(function() {});
+</script>
+</body>
+</html>

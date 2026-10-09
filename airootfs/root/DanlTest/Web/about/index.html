@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DanlTest – Systeminfo (erweitert)</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .card {
+            max-width: 860px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 28px;
+            box-shadow: 0 20px 60px rgba(0,20,40,0.12);
+            padding: 40px 35px;
+        }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #0b1e33;
+            margin-bottom: 6px;
+        }
+        .subhead {
+            font-size: 1rem;
+            color: #5e6f8d;
+            margin-bottom: 28px;
+            border-left: 4px solid #2a7de1;
+            padding-left: 16px;
+            background: #f8faff;
+            border-radius: 0 8px 8px 0;
+            line-height: 1.5;
+        }
+        .subhead strong { color: #0b1e33; }
+
+        /* Tabelle */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+        .info-table tr {
+            border-bottom: 1px solid #e9edf4;
+        }
+        .info-table tr:last-child { border-bottom: none; }
+        .info-table th, .info-table td {
+            padding: 12px 8px;
+            vertical-align: top;
+            text-align: left;
+        }
+        .info-table th {
+            width: 34%;
+            font-weight: 600;
+            color: #1f3349;
+        }
+        .info-table td {
+            width: 66%;
+            color: #1f2a3e;
+            word-break: break-word;
+        }
+        .info-table .highlight th {
+            color: #0b1e33;
+            font-size: 1.05rem;
+        }
+        .info-table .highlight td {
+            font-weight: 600;
+            color: #0a4b8a;
+        }
+        .badge {
+            display: inline-block;
+            background: #eef4ff;
+            padding: 2px 12px;
+            border-radius: 30px;
+            font-weight: 500;
+            color: #1f5f9e;
+            font-size: 0.85rem;
+        }
+        .section-title {
+            background: #f8faff;
+            font-weight: 700;
+            color: #1f3a5f;
+            letter-spacing: 0.5px;
+        }
+        .section-title th {
+            padding: 14px 8px 8px 8px;
+            font-size: 1.1rem;
+        }
+        .section-title td { display: none; } /* nur für die Struktur */
+
+        .footer {
+            margin-top: 28px;
+            padding-top: 18px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
+            color: #5f7393;
+            gap: 8px;
+        }
+        .live-clock {
+            font-family: 'JetBrains Mono', monospace;
+            background: #f2f6fd;
+            padding: 4px 14px;
+            border-radius: 40px;
+            color: #1f4b7a;
+            font-weight: 500;
+        }
+        @media (max-width: 480px) {
+            .card { padding: 20px 14px; }
+            h1 { font-size: 1.6rem; }
+            .info-table th, .info-table td { padding: 10px 4px; font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>💻 DanlTest</h1>
+    <div class="subhead">
+        <strong>Live‑System</strong> · hardwareunabhängig · <span id="currentDate"></span>
+    </div>
+
+    <table class="info-table" id="sysTable">
+        <tbody>
+            <!-- ===== STATISCHE SOFTWARE ===== -->
+            <tr class="section-title"><th colspan="2">📦 Software‑Info</th></tr>
+            <tr class="highlight">
+                <th>Betriebssystem</th>
+                <td>DanlTest <span style="font-weight:400;color:#2d4f7a;">(Live)</span></td>
+            </tr>
+            <tr class="highlight">
+                <th>Version</th>
+                <td>1.0-beta2</td>
+            </tr>
+            <tr>
+                <th>Build‑Datum</th>
+                <td><span class="badge">26. August 2026</span></td>
+            </tr>
+            <tr>
+                <th>Build‑ID</th>
+                <td><code style="background:#f0f4fa;padding:2px 10px;border-radius:6px;">2026.08.26-09:52</code></td>
+            </tr>
+
+            <!-- ===== HARDWARE (dynamisch) ===== -->
+            <tr class="section-title"><th colspan="2">🖥️ Hardware‑Informationen</th></tr>
+            <tr><th>CPU‑Kerne (logisch)</th><td id="hw-cores">–</td></tr>
+            <tr><th>Arbeitsspeicher (RAM)</th><td id="hw-ram">–</td></tr>
+            <tr><th>GPU‑Hersteller / Modell</th><td id="hw-gpu">–</td></tr>
+            <tr><th>Bildschirmauflösung</th><td id="hw-screen">–</td></tr>
+            <tr><th>Farbtiefe</th><td id="hw-color">–</td></tr>
+            <tr><th>Fenstergröße (aktuell)</th><td id="hw-window">–</td></tr>
+
+            <!-- ===== BROWSER / CHROMIUM ===== -->
+            <tr class="section-title"><th colspan="2">🌐 Browser‑Informationen</th></tr>
+            <tr><th>User‑Agent</th><td id="browser-ua">–</td></tr>
+            <tr><th>Browser‑Name &amp; Version</th><td id="browser-name">–</td></tr>
+            <tr><th>Plattform</th><td id="browser-platform">–</td></tr>
+            <tr><th>Sprache</th><td id="browser-lang">–</td></tr>
+            <tr><th>Zeitzone</th><td id="browser-tz">–</td></tr>
+            <tr><th>Cookies aktiv</th><td id="browser-cookies">–</td></tr>
+            <tr><th>Java aktiv</th><td id="browser-java">–</td></tr>
+
+            <!-- ===== SANDBOX / SICHERHEIT (indirekte Tests) ===== -->
+            <tr class="section-title"><th colspan="2">🔒 Sicherheit / Sandbox‑Hinweise</th></tr>
+            <tr><th>SharedArrayBuffer verfügbar</th><td id="sandbox-sab">–</td></tr>
+            <tr><th>crossOriginIsolated</th><td id="sandbox-coi">–</td></tr>
+            <tr><th>Sandbox‑Status (direkt)</th><td>❌ Nicht auslesbar (Datenschutz)</td></tr>
+            <tr><th>Hinweis</th><td style="font-size:0.9rem;color:#5f6f8f;">Fehlender SAB / crossOriginIsolated <em>kann</em> auf <code>--no-sandbox</code> hindeuten, ist aber kein Beweis.</td></tr>
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <span>🔄 <span id="reloadInfo">Seite geladen</span></span>
+        <span class="live-clock" id="liveClock">⏱️ –</span>
+    </div>
+</div>
+
+<script>
+    (function() {
+        "use strict";
+
+        // ----- Hilfsfunktionen -----
+        function setVal(id, value) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = value;
+        }
+
+        // ----- 1. Statisches Datum -----
+        const buildDate = new Date(2026, 7, 17);
+        document.getElementById('currentDate').textContent =
+            buildDate.toLocaleDateString('de-DE', { year:'numeric', month:'long', day:'numeric' });
+
+        // ----- 2. Hardware -----
+        // CPU-Kerne
+        const cores = navigator.hardwareConcurrency || 'unbekannt';
+        setVal('hw-cores', cores + (cores !== 'unbekannt' ? ' Kerne' : ''));
+
+        // RAM (nur Chromium / Edge)
+        const ram = navigator.deviceMemory;
+        if (ram) {
+            setVal('hw-ram', ram + ' GB (geschätzt)');
+        } else {
+            setVal('hw-ram', 'nicht verfügbar');
+        }
+
+        // GPU über WebGL (funktioniert meist, aber kann je nach Treiber variieren)
+        try {
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            if (gl) {
+                const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                if (debugInfo) {
+                    const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
+                    const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+                    setVal('hw-gpu', `${vendor} · ${renderer}`);
+                } else {
+                    setVal('hw-gpu', 'nicht verfügbar (Erweiterung fehlt)');
+                }
+            } else {
+                setVal('hw-gpu', 'WebGL nicht unterstützt');
+            }
+        } catch (e) {
+            setVal('hw-gpu', 'Fehler beim Auslesen');
+        }
+
+        // Bildschirm
+        const screenObj = window.screen;
+        setVal('hw-screen', `${screenObj.width} × ${screenObj.height} Pixel`);
+
+        // Farbtiefe
+        setVal('hw-color', screenObj.colorDepth + ' Bit');
+
+        // Fenstergröße (initial)
+        function updateWindowSize() {
+            document.getElementById('hw-window').textContent =
+                `${window.innerWidth} × ${window.innerHeight} Pixel`;
+        }
+        updateWindowSize();
+        window.addEventListener('resize', updateWindowSize);
+
+        // ----- 3. Browser / Chromium -----
+        setVal('browser-ua', navigator.userAgent);
+
+        // Browser-Name & Version (einfache Extraktion)
+        const ua = navigator.userAgent;
+        let browserInfo = 'unbekannt';
+        if (ua.includes('Chromium')) {
+            const match = ua.match(/Chromium\/(\d+\.\d+\.\d+\.\d+)/);
+            if (match) browserInfo = 'Chromium ' + match[1];
+            else browserInfo = 'Chromium (Version unbekannt)';
+        } else if (ua.includes('Chrome')) {
+            const match = ua.match(/Chrome\/(\d+\.\d+\.\d+\.\d+)/);
+            if (match) browserInfo = 'Chrome ' + match[1];
+            else browserInfo = 'Chrome (Version unbekannt)';
+        } else {
+            browserInfo = ua.split(' ').find(p => p.includes('/')) || 'unbekannt';
+        }
+        setVal('browser-name', browserInfo);
+
+        setVal('browser-platform', navigator.platform || 'unbekannt');
+        setVal('browser-lang', navigator.language || navigator.languages?.[0] || 'unbekannt');
+
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'unbekannt';
+        const offset = -new Date().getTimezoneOffset() / 60;
+        const offsetStr = (offset >= 0 ? '+' : '') + offset + 'h';
+        setVal('browser-tz', `${tz} (UTC${offsetStr})`);
+
+        setVal('browser-cookies', navigator.cookieEnabled ? '✅ Ja' : '❌ Nein');
+        setVal('browser-java', navigator.javaEnabled ? (navigator.javaEnabled() ? '✅ Ja' : '❌ Nein') : 'nicht verfügbar');
+
+        // ----- 4. Sandbox / Sicherheit -----
+        // SharedArrayBuffer testen
+        let sabAvailable = false;
+        try {
+            // SharedArrayBuffer existiert und kann instanziiert werden
+            const sab = new SharedArrayBuffer(1);
+            sabAvailable = true;
+        } catch (_) {
+            sabAvailable = false;
+        }
+        setVal('sandbox-sab', sabAvailable ? '✅ Verfügbar' : '❌ Nicht verfügbar');
+
+        // crossOriginIsolated
+        setVal('sandbox-coi', window.crossOriginIsolated ? '✅ Aktiv' : '❌ Inaktiv (oder nicht im sicheren Kontext)');
+
+        // ----- 5. Live-Uhr & Ladezeit -----
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('liveClock').textContent =
+                '⏱️ ' + now.toLocaleTimeString('de-DE', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        const loadTime = new Date().toLocaleTimeString('de-DE', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+        document.getElementById('reloadInfo').textContent = `geladen um ${loadTime}`;
+
+        console.log('✅ DanlTest erweiterte Systeminfo geladen');
+    })();
+</script>
+</body>
+</html>

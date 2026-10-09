@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DanlTech DanlTest TouchScreenChecker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #1a1a1a;
+            overflow: hidden;
+            touch-action: none;
+            font-family: 'Courier New', monospace;
+        }
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            background: #222;
+            touch-action: none;
+        }
+        #info {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            color: #0f0;
+            background: rgba(0, 0, 0, 0.75);
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 14px;
+            line-height: 1.6;
+            pointer-events: none;
+            user-select: none;
+            z-index: 10;
+            border: 1px solid #0f0;
+            box-shadow: 0 0 12px rgba(0, 255, 0, 0.2);
+            white-space: pre-line;
+            min-width: 160px;
+        }
+        #hint {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #aaa;
+            font-size: 20px;
+            pointer-events: none;
+            user-select: none;
+            z-index: 5;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px 24px;
+            border-radius: 30px;
+            border: 1px solid #444;
+            transition: opacity 0.4s ease;
+            opacity: 0.7;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+        #fullscreenBtn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 12px 28px;
+            background: #2a2a2a;
+            color: #0f0;
+            border: 2px solid #0f0;
+            border-radius: 40px;
+            font-size: 18px;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            z-index: 20;
+            touch-action: manipulation;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 0 16px rgba(0, 255, 0, 0.15);
+            letter-spacing: 1px;
+        }
+        #fullscreenBtn:hover {
+            background: #3a3a3a;
+        }
+        #fullscreenBtn:active {
+            transform: scale(0.95);
+        }
+        @media (max-width: 600px) {
+            #info {
+                font-size: 12px;
+                padding: 6px 10px;
+                top: 8px;
+                left: 8px;
+                min-width: 120px;
+            }
+            #fullscreenBtn {
+                padding: 8px 18px;
+                font-size: 15px;
+                bottom: 16px;
+                right: 16px;
+            }
+            #hint {
+                font-size: 16px;
+                padding: 6px 16px;
+                bottom: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div id="info">Berührungen: 0<br>Losgelassen: 0</div>
+    <div id="hint">👆 Berühre den Bildschirm, um zu testen</div>
+    <button id="fullscreenBtn">⛶ Vollbild</button>
+
+    <script>
+        (function() {
+            'use strict';
+
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            const infoDiv = document.getElementById('info');
+            const hintDiv = document.getElementById('hint');
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+            let N = 20;
+            let cellWidth = 0;
+            let cellHeight = 0;
+
+            // ---- Aktive Touches ----
+            const activeTouches = {};           // id -> { startX, startY, currentX, currentY, cells, path }
+            const activeTouchIds = [];
+
+            // ---- Abgeschlossene Touches (bleiben erhalten) ----
+            let completedTouches = [];           // Array von Touch-Daten (Start, Pfad, Zellen)
+            let releaseCounter = 0;
+
+            // ---- Hilfsfunktionen ----
+            function addTouch(id, x, y) {
+                if (x < 0 || y < 0 || x > canvas.width || y > canvas.height) return;
+                const col = Math.floor(x / cellWidth);
+                const row = Math.floor(y / cellHeight);
+                if (row < 0 || row >= N || col < 0 || col >= N) return;
+
+                const cells = new Set();
+                cells.add(`${row},${col}`);
+
+                activeTouches[id] = {
+                    startX: x,
+                    startY: y,
+                    currentX: x,
+                    currentY: y,
+                    cells: cells,
+                    path: [{ x, y }]
+                };
+                activeTouchIds.push(id);
+                hintDiv.style.opacity = '0';
+            }
+
+            function updateTouch(id, x, y) {
+                const t = activeTouches[id];
+                if (!t) return;
+                t.currentX = x;
+                t.currentY = y;
+                t.path.push({ x, y });
+
+                const col = Math.floor(x / cellWidth);
+                const row = Math.floor(y / cellHeight);
+                if (row >= 0 && row < N && col >= 0 && col < N) {
+                    t.cells.add(`${row},${col}`);
+                }
+            }
+
+            // Verschiebt einen aktiven Touch in die abgeschlossene Liste
+            function completeTouch(id) {
+                const t = activeTouches[id];
+                if (!t) return;
+                // Kopie der relevanten Daten anlegen
+                completedTouches.push({
+                    startX: t.startX,
+                    startY: t.startY,
+                    currentX: t.currentX,
+                    currentY: t.currentY,
+                    cells: new Set(t.cells),
+                    path: t.path.slice() // flache Kopie des Pfads
+                });
+                releaseCounter++;
+                delete activeTouches[id];
+                const idx = activeTouchIds.indexOf(id);
+                if (idx > -1) activeTouchIds.splice(idx, 1);
+            }
+
+            // ---- Canvas-Größe & Gitter ----
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                const minDim = Math.min(canvas.width, canvas.height);
+                let cellSize = Math.floor(minDim / 25);
+                if (cellSize < 20) cellSize = 20;
+                if (cellSize > 40) cellSize = 40;
+                N = Math.floor(minDim / cellSize);
+                if (N < 8) N = 8;
+                cellWidth = canvas.width / N;
+                cellHeight = canvas.height / N;
+                draw();
+            }
+
+            // ---- Zeichnen ----
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Sammle alle berührten Zellen (aktiv + abgeschlossen)
+                const activeCells = new Set();
+                for (const id in activeTouches) {
+                    for (const key of activeTouches[id].cells) {
+                        activeCells.add(key);
+                    }
+                }
+                const completedCells = new Set();
+                for (const comp of completedTouches) {
+                    for (const key of comp.cells) {
+                        completedCells.add(key);
+                    }
+                }
+
+                // 1. Zellen zeichnen
+                for (let i = 0; i < N; i++) {
+                    for (let j = 0; j < N; j++) {
+                        const x = j * cellWidth;
+                        const y = i * cellHeight;
+                        const key = `${i},${j}`;
+
+                        let color;
+                        if (activeCells.has(key)) {
+                            color = '#00ff00';          // leuchtendes Grün für aktive
+                        } else if (completedCells.has(key)) {
+                            color = '#66cc66';          // matteres Grün für gespeicherte
+                        } else {
+                            const isBorder = (i === 0 || i === N - 1 || j === 0 || j === N - 1);
+                            const isX = (i === j || i + j === N - 1);
+                            color = (isBorder || isX) ? '#4a4a4a' : '#2a2a2a';
+                        }
+
+                        ctx.fillStyle = color;
+                        ctx.fillRect(x, y, cellWidth, cellHeight);
+                        ctx.strokeStyle = '#555';
+                        ctx.lineWidth = 0.5;
+                        ctx.strokeRect(x, y, cellWidth, cellHeight);
+                    }
+                }
+
+                // 2. Pfade der abgeschlossenen Touches (matter, dünner)
+                for (const comp of completedTouches) {
+                    if (comp.path.length > 1) {
+                        ctx.beginPath();
+                        ctx.moveTo(comp.path[0].x, comp.path[0].y);
+                        for (let i = 1; i < comp.path.length; i++) {
+                            ctx.lineTo(comp.path[i].x, comp.path[i].y);
+                        }
+                        ctx.strokeStyle = '#ddaa44';
+                        ctx.lineWidth = 2;
+                        ctx.shadowColor = 'transparent';
+                        ctx.shadowBlur = 0;
+                        ctx.stroke();
+                    }
+                }
+
+                // 3. Pfade der aktiven Touches (leuchtend, dick)
+                for (const id in activeTouches) {
+                    const t = activeTouches[id];
+                    if (t.path.length > 1) {
+                        ctx.beginPath();
+                        ctx.moveTo(t.path[0].x, t.path[0].y);
+                        for (let i = 1; i < t.path.length; i++) {
+                            ctx.lineTo(t.path[i].x, t.path[i].y);
+                        }
+                        ctx.strokeStyle = '#ffcc00';
+                        ctx.lineWidth = 3;
+                        ctx.shadowColor = '#ffcc00';
+                        ctx.shadowBlur = 8;
+                        ctx.stroke();
+                        ctx.shadowBlur = 0;
+                    }
+
+                    // Aktuelle Position (roter Punkt)
+                    ctx.beginPath();
+                    ctx.arc(t.currentX, t.currentY, 12, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#ff3333';
+                    ctx.shadowColor = '#ff3333';
+                    ctx.shadowBlur = 14;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    // Startpunkt (hellblau)
+                    ctx.beginPath();
+                    ctx.arc(t.startX, t.startY, 6, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#00ffff';
+                    ctx.shadowColor = '#00ffff';
+                    ctx.shadowBlur = 10;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                }
+
+                // 4. Info aktualisieren
+                updateInfo();
+            }
+
+            // ---- Info-Box ----
+            function updateInfo() {
+                const count = Object.keys(activeTouches).length;
+                let text = `Berührungen: ${count}\nLosgelassen: ${releaseCounter}`;
+
+                if (count > 0) {
+                    const firstId = activeTouchIds[0];
+                    const first = activeTouches[firstId];
+                    if (first) {
+                        const dx = first.currentX - first.startX;
+                        const dy = first.currentY - first.startY;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        let dir = '';
+                        if (dist > 30) {
+                            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                            if (angle > -45 && angle <= 45) dir = '→';
+                            else if (angle > 45 && angle <= 135) dir = '↓';
+                            else if (angle > 135 || angle <= -135) dir = '←';
+                            else dir = '↑';
+                            text += `\nSwipe: ${dir}  ${Math.round(dist)}px`;
+                        } else {
+                            text += `\nSwipe: –  (${Math.round(dist)}px)`;
+                        }
+                        text += `\nPos: (${Math.round(first.currentX)}, ${Math.round(first.currentY)})`;
+                    }
+                }
+                infoDiv.textContent = text;
+            }
+
+            // ---- Touch-Events ----
+            function handleTouchStart(e) {
+                e.preventDefault();
+                for (const touch of e.changedTouches) {
+                    const rect = canvas.getBoundingClientRect();
+                    const x = touch.clientX - rect.left;
+                    const y = touch.clientY - rect.top;
+                    addTouch(touch.identifier, x, y);
+                }
+                draw();
+            }
+
+            function handleTouchMove(e) {
+                e.preventDefault();
+                for (const touch of e.changedTouches) {
+                    const rect = canvas.getBoundingClientRect();
+                    const x = touch.clientX - rect.left;
+                    const y = touch.clientY - rect.top;
+                    updateTouch(touch.identifier, x, y);
+                }
+                draw();
+            }
+
+            function handleTouchEnd(e) {
+                e.preventDefault();
+                for (const touch of e.changedTouches) {
+                    completeTouch(touch.identifier);   // verschiebt in completedTouches
+                }
+                draw();
+            }
+
+            function handleTouchCancel(e) {
+                e.preventDefault();
+                for (const touch of e.changedTouches) {
+                    completeTouch(touch.identifier);
+                }
+                draw();
+            }
+
+            canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+            canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+            canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+            canvas.addEventListener('touchcancel', handleTouchCancel, { passive: false });
+
+            // ---- Maus-Unterstützung (Desktop) ----
+            let mouseDown = false;
+            canvas.addEventListener('mousedown', (e) => {
+                mouseDown = true;
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                addTouch('mouse', x, y);
+                draw();
+            });
+            canvas.addEventListener('mousemove', (e) => {
+                if (!mouseDown) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                updateTouch('mouse', x, y);
+                draw();
+            });
+            canvas.addEventListener('mouseup', (e) => {
+                if (mouseDown) {
+                    mouseDown = false;
+                    completeTouch('mouse');
+                    draw();
+                }
+            });
+            canvas.addEventListener('mouseleave', () => {
+                if (mouseDown) {
+                    mouseDown = false;
+                    completeTouch('mouse');
+                    draw();
+                }
+            });
+
+            // ---- Vollbild ----
+            fullscreenBtn.addEventListener('click', () => {
+                const el = document.documentElement;
+                if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+                else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+                else if (el.msRequestFullscreen) el.msRequestFullscreen();
+            });
+
+            // ---- Fenstergröße ----
+            window.addEventListener('resize', resizeCanvas);
+
+            // ---- Start ----
+            resizeCanvas();
+        })();
+    </script>
+</body>
+</html>
