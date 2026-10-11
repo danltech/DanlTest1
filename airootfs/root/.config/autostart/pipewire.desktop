@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Name=PipeWire Audio
+Comment=Startet PipeWire Sound-Server fuer Root-User
+Exec=sh -c "pipewire & wireplumber & pipewire-pulse"
+Terminal=false
+Type=Application
+X-KDE-Autostart-phase=1

@@ -35,6 +35,13 @@
         "terminal": false
     },
     {
+        "name": "DanlTechOS Manager",
+        "description": "Systemupdates und mehr für die Basis des Live-Systems",
+        "category": "System",
+        "command": "danltechos-mgr",
+        "terminal": true
+    },
+    {
         "name": "Dolphin",
         "description": "Dateimanager – intuitive Verwaltung von Dateien und Ordnern",
         "category": "System",

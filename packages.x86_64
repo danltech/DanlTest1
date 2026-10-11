@@ -182,3 +182,25 @@ filezilla
 kvirc
 clamav
 clamtk
+testdisk
+ddrescue
+lshw
+stress-ng
+rustdesk-bin
+
+# Alternative Browser (if Chromium is bugging)
+firefox
+
+
+danltechos-mgr
+
+
+# sounds
+
+pipewire
+pipewire-audio
+pipewire-pulse
+wireplumber
+plasma-pa
+sof-firmware
+alsa-utils

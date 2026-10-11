@@ -219,7 +219,7 @@ class RecoveryLauncher:
             # Führe den Befehl im Hintergrund aus
             if tool.get('terminal', False):
                 # Starte in Terminal wenn benötigt
-                subprocess.Popen(['x-terminal-emulator', '-e', command])
+                subprocess.Popen(['konsole', '-e', command])
             else:
                 subprocess.Popen(command, shell=True)
 
