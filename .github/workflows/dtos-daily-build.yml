@@ -18,6 +18,13 @@ jobs:
     steps:
       - name: Code auschecken
         uses: actions/checkout@v4
+        
+      - name: Repository Schlüssel empfangen und signieren
+        run: |
+          pacman-key --init
+          pacman-key --populate archlinux
+          pacman-key --recv-keys B3A28DD24056E9C0AB278B09820A40D57FD9C842
+          pacman-key --lsign-key B3A28DD24056E9C0AB278B09820A40D57FD9C842
 
       - name: DanlTechOS Pacman Repository hinzufügen
         run: |
