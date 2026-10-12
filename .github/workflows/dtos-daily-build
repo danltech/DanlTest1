@@ -1,0 +1,47 @@
+name: Daily DanlTechOS ISO Build
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    container:
+      image: archlinux:latest
+      options: --privileged
+
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v4
+
+      - name: DanlTechOS Pacman Repository hinzufügen
+        run: |
+          echo -e "\n[danltechos]\nSigLevel = Optional TrustAll\nServer = https://danltech.github.io/danltechos-repo/x86_64" >> /etc/pacman.conf
+
+      - name: System updaten & Archiso installieren
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S archiso xorriso squashfs-tools --noconfirm
+
+      - name: ISO bauen mit mkarchiso
+        run: |
+          mkdir -p /tmp/archiso-workspace
+          mkdir -p /tmp/archiso-out
+          mkarchiso -v -w /tmp/archiso-workspace -o /tmp/archiso-out .
+
+      - name: In gleiches Release hochladen
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          tag: "daily"
+          name: "DanlTechOS Daily Build"
+          body: "Zuletzt aktualisiert: ${{ github.event.repository.updated_at }}"
+          artifacts: /tmp/archiso-out/*.iso
+          removeArtifacts: true
+          replacesArtifacts: true
+          makeLatest: true
