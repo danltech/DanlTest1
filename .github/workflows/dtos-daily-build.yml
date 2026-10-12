@@ -23,11 +23,17 @@ jobs:
         run: |
           echo -e "\n[danltechos]\nSigLevel = Optional TrustAll\nServer = https://danltech.github.io/danltechos-repo/x86_64" >> /etc/pacman.conf
 
-      - name: Repository Schlüssel empfangen und signieren
+      - name: DanlTechOS Repository-Schlüssel importieren
         run: |
           pacman-key --init
           pacman-key --populate archlinux
-          pacman-key --recv-keys B3A28DD24056E9C0AB278B09820A40D57FD9C842
+
+          curl -fsSL \
+            https://danltech.github.io/danltechos-repo/x86_64/danltechos-repo-key.asc \
+            -o /tmp/danltechos-repo-key.asc
+
+          pacman-key --add /tmp/danltechos-repo-key.asc
+          pacman-key --finger B3A28DD24056E9C0AB278B09820A40D57FD9C842
           pacman-key --lsign-key B3A28DD24056E9C0AB278B09820A40D57FD9C842
 
       - name: System updaten & Archiso installieren
