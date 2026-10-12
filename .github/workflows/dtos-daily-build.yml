@@ -47,14 +47,11 @@ jobs:
           mkdir -p /tmp/archiso-out
           mkarchiso -v -w /tmp/archiso-workspace -o /tmp/archiso-out .
 
-      - name: In gleiches Release hochladen
-        uses: ncipollo/release-action@v1
+      - name: ISO als Run Artifact hochladen
+        uses: actions/upload-artifact@v4
         with:
-          allowUpdates: true
-          tag: "daily"
-          name: "DanlTechOS Daily Build"
-          body: "Zuletzt aktualisiert: ${{ github.event.repository.updated_at }}"
-          artifacts: /tmp/archiso-out/*.iso
-          removeArtifacts: true
-          replacesArtifacts: true
-          makeLatest: true
+          name: DanlTechOS-Daily-ISO
+          path: /tmp/archiso-out/*.iso
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
