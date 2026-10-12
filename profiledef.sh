@@ -24,3 +24,5 @@ file_permissions=(
   ["/usr/local/bin/Installation_guide"]="0:0:755"
   ["/usr/local/bin/livecd-sound"]="0:0:755"
 )
+
+sed -i "s/NAME=.*/NAME=\"DanlTechOS – $(date +%Y-%m-%d)\"/g" "$(dirname "${BASH_SOURCE[0]}")/airootfs/etc/os-release"
